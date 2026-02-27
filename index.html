@@ -779,6 +779,10 @@
       100%{ transform: translateY(0) rotate(0deg); }
     }
 
+
+    /* Stack shuffle (noticeable): cards gather into a pile then spread back */
+    .luck-board.luck-animating{ position: relative; }
+    .pcard.stacking{ pointer-events:none; }
     .luck-controls{
       display:flex;
       align-items:center;
@@ -1512,7 +1516,113 @@
       }
     }
 
-    function startGame(){
+    function wait(ms){ return new Promise(res => setTimeout(res, ms)); }
+
+    async function animateStackShuffle(){
+      const cards = Array.from(luckBoard.children);
+      if(!cards.length) return;
+
+      // 1) Зафиксируем текущие позиции (grid)
+      const first = cards.map(c => c.getBoundingClientRect());
+
+      // 2) Переводим в абсолют для "складывания в стопку"
+      const boardRect = luckBoard.getBoundingClientRect();
+      luckBoard.classList.add("luck-animating");
+
+      cards.forEach((c, i) => {
+        const r = first[i];
+        c.style.position = "absolute";
+        c.style.left = (r.left - boardRect.left) + "px";
+        c.style.top = (r.top - boardRect.top) + "px";
+        c.style.width = r.width + "px";
+        c.style.height = r.height + "px";
+        c.style.margin = "0";
+        c.style.zIndex = String(10 + i);
+        c.classList.add("stacking");
+      });
+
+      // Важно: чтобы контейнер сохранил высоту при absolute
+      luckBoard.style.height = boardRect.height + "px";
+
+      // 3) Анимируем в центр стопки
+      const sample = first[0];
+      const cx = (boardRect.width - sample.width) / 2;
+      const cy = (boardRect.height - sample.height) / 2;
+
+      // старт transitions
+      cards.forEach((c, i) => {
+        c.style.transition = "left 420ms cubic-bezier(.2,.9,.2,1), top 420ms cubic-bezier(.2,.9,.2,1), transform 420ms cubic-bezier(.2,.9,.2,1)";
+      });
+
+      // frame
+      await wait(20);
+      cards.forEach((c, i) => {
+        const jitter = (i - (cards.length-1)/2) * 0.8;
+        c.style.left = (cx + jitter) + "px";
+        c.style.top = (cy - jitter) + "px";
+        c.style.transform = `rotate(${(i%2?1:-1)*(2.2 + i*0.15)}deg) scale(0.98)`;
+      });
+
+      await wait(460);
+
+      // 4) Тасуем DOM-узлы (когда все уже в стопке)
+      const shuffled = cards.slice().sort(() => Math.random() - 0.5);
+      shuffled.forEach(node => luckBoard.appendChild(node));
+
+      // 5) Раскладываем обратно с FLIP: из стопки → в новую сетку
+      // Снимем текущие (стопка) позиции
+      const stackRects = Array.from(luckBoard.children).map(c => c.getBoundingClientRect());
+
+      // Вернём обычный flow (grid), чтобы получить финальные позиции
+      Array.from(luckBoard.children).forEach((c) => {
+        c.style.transition = "none";
+        c.style.transform = "none";
+        c.style.position = "";
+        c.style.left = "";
+        c.style.top = "";
+        c.style.width = "";
+        c.style.height = "";
+        c.style.margin = "";
+        c.style.zIndex = "";
+      });
+
+      // дать браузеру пересчитать layout
+      await wait(20);
+
+      const finalRects = Array.from(luckBoard.children).map(c => c.getBoundingClientRect());
+
+      // Инвертируем: визуально оставляем в стопке
+      Array.from(luckBoard.children).forEach((c, i) => {
+        const sr = stackRects[i];
+        const fr = finalRects[i];
+        const dx = sr.left - fr.left;
+        const dy = sr.top - fr.top;
+        c.style.transition = "none";
+        c.style.transform = `translate(${dx}px, ${dy}px) rotate(${(i%2?1:-1)*2}deg) scale(0.98)`;
+      });
+
+      // frame
+      await wait(20);
+
+      // А теперь плавно в 0 → окажутся в сетке
+      Array.from(luckBoard.children).forEach((c) => {
+        c.style.transition = "transform 560ms cubic-bezier(.2,.9,.2,1)";
+        c.style.transform = "translate(0px, 0px) rotate(0deg) scale(1)";
+      });
+
+      await wait(590);
+
+      // cleanup
+      luckBoard.style.height = "";
+      luckBoard.classList.remove("luck-animating");
+      Array.from(luckBoard.children).forEach(c => {
+        c.classList.remove("stacking");
+        c.style.transition = "";
+        c.style.transform = "";
+      });
+    }
+
+    async function startGame(){
       // защита от повторов
       const saved = loadLuck();
       if(saved && saved.claimed){
@@ -1528,28 +1638,16 @@
       // переворачиваем (все рубашкой вверх)
       setAllFaceDown();
 
-      // визуальное перемешивание: быстрая перестановка DOM + небольшая дрожь
-      const cards = Array.from(luckBoard.children);
-      cards.forEach(c => c.classList.add("shuffling"));
-      shuffleTimer = setInterval(() => {
-        const arr = Array.from(luckBoard.children);
-        // тасуем DOM-узлы
-        for(let i = arr.length - 1; i > 0; i--){
-          const j = Math.floor(Math.random() * (i + 1));
-          luckBoard.insertBefore(arr[j], arr[i]);
-          // обновим массив локально
-          const tmp = arr[i];
-          arr[i] = arr[j];
-          arr[j] = tmp;
-        }
-      }, 120);
+      // заметная анимация: сложить в стопку → разложить обратно
+      try{
+        await animateStackShuffle();
+      }catch(e){
+        // если что-то пошло не так — просто продолжаем
+      }
 
-      setTimeout(() => {
-        stopShuffle();
-        luckState = "pick";
-        luckStatus.textContent = "Выберите карточку 👇";
-        setBoardDisabled(false);
-      }, 1400);
+      luckState = "pick";
+      luckStatus.textContent = "Выберите карточку 👇";
+      setBoardDisabled(false);
     }
 
     function onPick(domCard){
