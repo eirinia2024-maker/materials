@@ -206,6 +206,7 @@
       display:flex;
       flex-wrap: wrap;
       gap: 10px;
+      align-items:center;
     }
     .badge{
       padding: 8px 10px;
@@ -244,6 +245,46 @@
     .chip[data-filter="reading"].active{ border-color: rgba(16,185,129,.35); background: linear-gradient(180deg, rgba(16,185,129,.14), rgba(255,255,255,1)); }
     .chip[data-filter="thematic"].active{ border-color: rgba(245,158,11,.35); background: linear-gradient(180deg, rgba(245,158,11,.14), rgba(255,255,255,1)); }
     .chip[data-filter="other"].active{ border-color: rgba(37,99,235,.35); background: linear-gradient(180deg, rgba(37,99,235,.14), rgba(255,255,255,1)); }
+
+    /* =========================
+       LUCKY BUTTON (gamification)
+       ========================= */
+    .luck-btn{
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(37,99,235,.28);
+      background:
+        radial-gradient(140px 60px at 18% 15%, rgba(245,158,11,.22), transparent 62%),
+        radial-gradient(160px 70px at 86% 15%, rgba(239,68,68,.18), transparent 64%),
+        linear-gradient(180deg, rgba(37,99,235,.14), rgba(255,255,255,1));
+      font-size: 12.5px;
+      color: rgba(15,23,42,.92);
+      font-weight: 850;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(15,23,42,.10);
+      transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease;
+      user-select:none;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .luck-btn:hover{ border-color: rgba(239,68,68,.35); box-shadow: 0 14px 34px rgba(15,23,42,.12); }
+    .luck-btn:active{ transform: translateY(1px); }
+    .luck-btn[disabled]{
+      opacity: .7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .luck-spark{
+      width: 18px;
+      height: 18px;
+      border-radius: 8px;
+      display:grid;
+      place-items:center;
+      background: rgba(239,68,68,.10);
+      border: 1px solid rgba(15,23,42,.10);
+    }
 
     .hero-card{
       border-radius: 18px;
@@ -591,6 +632,221 @@
 
     footer a{ color: var(--accent2); text-decoration: underline; }
 
+    /* =========================
+       LUCKY GAME MODAL
+       ========================= */
+    .luck-modal{
+      width: min(860px, 100%);
+      background: var(--paper);
+      border-radius: 22px;
+      border: 1px solid rgba(15,23,42,.12);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+
+    .luck-head{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      background:
+        radial-gradient(520px 180px at 15% 30%, rgba(37,99,235,.10), transparent 62%),
+        radial-gradient(520px 180px at 90% 20%, rgba(239,68,68,.10), transparent 62%),
+        linear-gradient(180deg, rgba(255,255,255,1), rgba(255,255,255,.92));
+    }
+
+    .luck-head b{
+      font-size: 14px;
+      letter-spacing: .1px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+    }
+
+    .luck-body{
+      padding: 16px;
+      display:flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .luck-sub{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .luck-board{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 720px){
+      .luck-board{ grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .pcard{
+      position: relative;
+      border-radius: 18px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 14px 32px rgba(15,23,42,.08);
+      min-height: 110px;
+      cursor: pointer;
+      user-select:none;
+      perspective: 900px;
+      overflow:hidden;
+    }
+    .pcard[aria-disabled="true"]{ cursor: default; }
+
+    .pinner{
+      position:absolute;
+      inset:0;
+      transform-style: preserve-3d;
+      transition: transform 520ms cubic-bezier(.2,.85,.2,1);
+    }
+
+    .pface{
+      position:absolute;
+      inset:0;
+      backface-visibility: hidden;
+      display:flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 14px 14px 13px;
+      gap: 8px;
+    }
+
+    .pfront{
+      background:
+        radial-gradient(240px 120px at 18% 15%, rgba(37,99,235,.12), transparent 62%),
+        radial-gradient(240px 120px at 86% 10%, rgba(239,68,68,.10), transparent 64%),
+        radial-gradient(260px 140px at 60% 120%, rgba(16,185,129,.10), transparent 64%),
+        linear-gradient(180deg, rgba(255,255,255,1), rgba(37,99,235,.04));
+    }
+
+    .pfront .ptitle{
+      font-weight: 900;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+    .pfront .pmeta{
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .pback{
+      transform: rotateY(180deg);
+      background:
+        radial-gradient(220px 120px at 20% 20%, rgba(245,158,11,.14), transparent 62%),
+        radial-gradient(240px 140px at 80% 20%, rgba(37,99,235,.12), transparent 64%),
+        linear-gradient(180deg, rgba(255,255,255,1), rgba(239,68,68,.04));
+    }
+
+    .pseal{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      font-weight: 950;
+      letter-spacing: .2px;
+      color: rgba(15,23,42,.85);
+      font-size: 13px;
+    }
+
+    .pseal .dot{
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,.18);
+      background: rgba(239,68,68,.35);
+    }
+
+    .pinner.face-down{ transform: rotateY(180deg); }
+    .pinner.revealed{ transform: rotateY(0deg); }
+
+    /* Shuffle animation (visual only) */
+    .pcard.shuffling{ animation: pshake 820ms ease-in-out infinite; }
+    @keyframes pshake{
+      0%{ transform: translateY(0) rotate(0deg); }
+      25%{ transform: translateY(-1px) rotate(-.4deg); }
+      50%{ transform: translateY(0) rotate(.5deg); }
+      75%{ transform: translateY(1px) rotate(-.3deg); }
+      100%{ transform: translateY(0) rotate(0deg); }
+    }
+
+    .luck-controls{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-top: 6px;
+    }
+
+    .luck-controls .left{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .linkbtn{
+      border: none;
+      background: none;
+      color: var(--accent2);
+      font-weight: 700;
+      cursor: pointer;
+      padding: 6px 4px;
+      text-decoration: underline;
+      font-size: 12.5px;
+    }
+
+    .luck-note{
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .mini-overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,.55);
+      backdrop-filter: blur(8px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 120;
+    }
+    .mini{
+      width: min(720px, 100%);
+      background: var(--paper);
+      border-radius: 22px;
+      border: 1px solid rgba(15,23,42,.12);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+    .mini .mini-top{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      background: linear-gradient(180deg, rgba(37,99,235,.05), rgba(255,255,255,1));
+    }
+    .mini .mini-body{ padding: 16px; }
+    .mini .mini-body p{
+      margin: 0 0 10px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 13.5px;
+    }
+
   </style>
 </head>
 <body>
@@ -636,6 +892,12 @@
           <button class="chip" type="button" data-filter="reading">Чтение</button>
           <button class="chip" type="button" data-filter="thematic">Тематические уроки</button>
           <button class="chip" type="button" data-filter="other">Другое</button>
+
+          <!-- 🎲 Геймификация: кнопка мини-игры (как на твоём скрине) -->
+          <button id="luckBtn" class="luck-btn" type="button" style="margin-left:10px">
+            <span class="luck-spark">🎲</span>
+            Мне повезёт!
+          </button>
         </div>
       </div>
     </section>
@@ -684,6 +946,53 @@
           </div>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- LUCKY GAME MODAL -->
+  <div id="luckOverlay" class="overlay" aria-hidden="true">
+    <div class="luck-modal" role="dialog" aria-modal="true" aria-label="Мини-игра с призами">
+      <div class="luck-head">
+        <b>
+          <span class="luck-spark">🎁</span>
+          Мне повезёт!
+        </b>
+        <button id="luckClose" class="xbtn" aria-label="Закрыть">×</button>
+      </div>
+
+      <div class="luck-body">
+        <p id="luckSub" class="luck-sub">Нажми «Играть», затем выбери одну карточку и получи призовой купон.</p>
+
+        <div id="luckBoard" class="luck-board" aria-label="Карточки с призами"></div>
+
+        <div class="luck-controls">
+          <div class="left">
+            <button id="luckPlay" class="btn primary" type="button">Играть</button>
+            <button id="luckDownload" class="btn" type="button" style="display:none">Скачать призовой купон</button>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <button id="rulesBtn" class="linkbtn" type="button">Правила акции</button>
+            <span id="luckStatus" class="luck-note"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RULES (mini modal) -->
+  <div id="rulesOverlay" class="mini-overlay" aria-hidden="true">
+    <div class="mini" role="dialog" aria-modal="true" aria-label="Правила акции">
+      <div class="mini-top">
+        <b>Правила акции</b>
+        <button id="rulesClose" class="xbtn" aria-label="Закрыть">×</button>
+      </div>
+      <div class="mini-body">
+        <p>Призовой купон можно получить и применить только один раз.</p>
+        <p><b>*</b> Бесплатно предоставляется товар по наименьшей стоимости в корзине.</p>
+        <p><b>**</b> Любая книга из раздела «Чтение». Приз предоставляется при приобретении любого товара на сайте.</p>
+        <p><b>***</b> Любой материал по отдельной грамматической теме из раздела «Грамматика». Приз предоставляется при приобретении любого товара на сайте.</p>
       </div>
     </div>
   </div>
@@ -993,6 +1302,477 @@
 
     // first render
     render(filtered);
+
+    /* ==========================================================
+       🎲 GAMIFICATION: "Мне повезёт!" (лок на устройство навсегда)
+       ========================================================== */
+
+    const LUCK_KEY = "pe_luck_coupon_v1";
+
+    const luckBtn = document.getElementById("luckBtn");
+    const luckOverlay = document.getElementById("luckOverlay");
+    const luckClose = document.getElementById("luckClose");
+    const luckBoard = document.getElementById("luckBoard");
+    const luckPlay = document.getElementById("luckPlay");
+    const luckDownload = document.getElementById("luckDownload");
+    const luckStatus = document.getElementById("luckStatus");
+    const luckSub = document.getElementById("luckSub");
+
+    const rulesBtn = document.getElementById("rulesBtn");
+    const rulesOverlay = document.getElementById("rulesOverlay");
+    const rulesClose = document.getElementById("rulesClose");
+
+    const PRIZES = [
+      {
+        id: "p1",
+        title: "Скидка 10% на любой товар",
+        meta: "Купон на скидку",
+        weight: 1
+      },
+      {
+        id: "p2",
+        title: "Третий товар бесплатно*",
+        meta: "Подарок в корзине",
+        weight: 1
+      },
+      {
+        id: "p3",
+        title: "Скидка 20% на любой товар",
+        meta: "Редкий приз",
+        weight: 0.35 // заметно ниже, но не «микро»
+      },
+      {
+        id: "p4",
+        title: "Супер приз! Скидка 15% на всю корзину",
+        meta: "На весь заказ",
+        weight: 1
+      },
+      {
+        id: "p5",
+        title: "Книга для чтения в подарок**",
+        meta: "Из раздела «Чтение»",
+        weight: 1
+      },
+      {
+        id: "p6",
+        title: "Урок по грамматике в подарок***",
+        meta: "Из раздела «Грамматика»",
+        weight: 1
+      },
+    ];
+
+    function loadLuck(){
+      try{
+        const raw = localStorage.getItem(LUCK_KEY);
+        return raw ? JSON.parse(raw) : null;
+      }catch{ return null; }
+    }
+
+    function saveLuck(data){
+      try{ localStorage.setItem(LUCK_KEY, JSON.stringify(data)); }catch{}
+    }
+
+    function randCode(){
+      const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // без похожих символов
+      let s = "PE-";
+      for(let i=0;i<6;i++) s += alphabet[Math.floor(Math.random()*alphabet.length)];
+      return s;
+    }
+
+    function weightedPick(items){
+      const total = items.reduce((a,x)=>a+(x.weight||1),0);
+      let r = Math.random() * total;
+      for(const it of items){
+        r -= (it.weight||1);
+        if(r <= 0) return it;
+      }
+      return items[items.length-1];
+    }
+
+    function fmtDate(ts){
+      const d = new Date(ts);
+      const dd = String(d.getDate()).padStart(2,"0");
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const yy = d.getFullYear();
+      return `${dd}.${mm}.${yy}`;
+    }
+
+    let luckState = "idle"; // idle | shuffling | pick | done
+    let shuffleTimer = null;
+
+    function openLuck(){
+      luckOverlay.style.display = "flex";
+      luckOverlay.setAttribute("aria-hidden","false");
+      document.body.style.overflow = "hidden";
+      hydrateLuckUI();
+    }
+
+    function closeLuck(){
+      luckOverlay.style.display = "none";
+      luckOverlay.setAttribute("aria-hidden","true");
+      document.body.style.overflow = "";
+      stopShuffle();
+    }
+
+    function openRules(){
+      rulesOverlay.style.display = "flex";
+      rulesOverlay.setAttribute("aria-hidden","false");
+    }
+    function closeRules(){
+      rulesOverlay.style.display = "none";
+      rulesOverlay.setAttribute("aria-hidden","true");
+    }
+
+    function stopShuffle(){
+      if(shuffleTimer){ clearInterval(shuffleTimer); shuffleTimer = null; }
+      Array.from(luckBoard.children).forEach(el => el.classList.remove("shuffling"));
+    }
+
+    function renderPrizeCards(){
+      luckBoard.innerHTML = "";
+      PRIZES.forEach((p, idx) => {
+        const card = document.createElement("div");
+        card.className = "pcard";
+        card.setAttribute("role","button");
+        card.setAttribute("tabindex","0");
+        card.setAttribute("data-idx", String(idx));
+        card.setAttribute("aria-label", p.title);
+
+        card.innerHTML = `
+          <div class="pinner" data-inner>
+            <div class="pface pfront">
+              <div class="ptitle">${escapeHtml(p.title)}</div>
+              <div class="pmeta">${escapeHtml(p.meta || "")}</div>
+            </div>
+            <div class="pface pback">
+              <div class="pseal"><span class="dot"></span> Выберите карточку <span class="dot"></span></div>
+            </div>
+          </div>
+        `;
+        luckBoard.appendChild(card);
+      });
+    }
+
+    function setAllFaceDown(){
+      Array.from(luckBoard.querySelectorAll("[data-inner]")).forEach(el => {
+        el.classList.add("face-down");
+        el.classList.remove("revealed");
+      });
+    }
+
+    function revealCard(domCard, prize){
+      const inner = domCard.querySelector("[data-inner]");
+      const frontTitle = domCard.querySelector(".pfront .ptitle");
+      const frontMeta = domCard.querySelector(".pfront .pmeta");
+      frontTitle.textContent = prize.title;
+      frontMeta.textContent = "Ваш приз 🎉";
+      inner.classList.remove("face-down");
+      inner.classList.add("revealed");
+    }
+
+    function setBoardDisabled(disabled){
+      Array.from(luckBoard.children).forEach(el => {
+        el.setAttribute("aria-disabled", disabled ? "true" : "false");
+      });
+    }
+
+    function hydrateLuckUI(){
+      const saved = loadLuck();
+      renderPrizeCards();
+
+      luckDownload.style.display = "none";
+      luckPlay.style.display = "inline-block";
+      luckPlay.disabled = false;
+      luckState = "idle";
+      luckStatus.textContent = "";
+      luckSub.textContent = "Нажми «Играть», затем выбери одну карточку и получи призовой купон.";
+
+      // если уже получали — показываем результат и даём скачать снова
+      if(saved && saved.claimed){
+        luckState = "done";
+        luckPlay.style.display = "inline-block";
+        luckPlay.textContent = "Сыграно";
+        luckPlay.disabled = true;
+        luckDownload.style.display = "inline-block";
+        luckStatus.textContent = `Купон уже получен: ${saved.code} (${fmtDate(saved.ts)})`;
+        luckSub.textContent = "Вы уже получили купон на этом устройстве. Можете скачать его ещё раз.";
+        setAllFaceDown();
+        setBoardDisabled(true);
+
+        // покажем одну «победившую» карточку для красоты
+        const prize = PRIZES.find(p => p.id === saved.prizeId) || PRIZES[0];
+        const pick = luckBoard.children[Math.min(2, luckBoard.children.length-1)];
+        if(pick) revealCard(pick, prize);
+
+        luckDownload.onclick = () => downloadCoupon(prize, saved.code, saved.ts);
+      }else{
+        // ещё не играли
+        luckPlay.textContent = "Играть";
+        setBoardDisabled(true);
+      }
+    }
+
+    function startGame(){
+      // защита от повторов
+      const saved = loadLuck();
+      if(saved && saved.claimed){
+        hydrateLuckUI();
+        return;
+      }
+
+      luckState = "shuffling";
+      luckDownload.style.display = "none";
+      luckStatus.textContent = "Перемешиваем…";
+      setBoardDisabled(true);
+
+      // переворачиваем (все рубашкой вверх)
+      setAllFaceDown();
+
+      // визуальное перемешивание: быстрая перестановка DOM + небольшая дрожь
+      const cards = Array.from(luckBoard.children);
+      cards.forEach(c => c.classList.add("shuffling"));
+      shuffleTimer = setInterval(() => {
+        const arr = Array.from(luckBoard.children);
+        // тасуем DOM-узлы
+        for(let i = arr.length - 1; i > 0; i--){
+          const j = Math.floor(Math.random() * (i + 1));
+          luckBoard.insertBefore(arr[j], arr[i]);
+          // обновим массив локально
+          const tmp = arr[i];
+          arr[i] = arr[j];
+          arr[j] = tmp;
+        }
+      }, 120);
+
+      setTimeout(() => {
+        stopShuffle();
+        luckState = "pick";
+        luckStatus.textContent = "Выберите карточку 👇";
+        setBoardDisabled(false);
+      }, 1400);
+    }
+
+    function onPick(domCard){
+      const saved = loadLuck();
+      if(saved && saved.claimed){
+        // уже сыграно
+        return;
+      }
+      if(luckState !== "pick") return;
+      if(domCard.getAttribute("aria-disabled") === "true") return;
+
+      luckState = "done";
+      setBoardDisabled(true);
+
+      const prize = weightedPick(PRIZES);
+      const code = randCode();
+      const ts = Date.now();
+
+      revealCard(domCard, prize);
+      luckStatus.textContent = `Ваш купон: ${code}`;
+      luckSub.textContent = "Готово! Скачайте купон и используйте его один раз.";
+      luckDownload.style.display = "inline-block";
+
+      saveLuck({ claimed: true, prizeId: prize.id, code, ts });
+      luckPlay.textContent = "Сыграно";
+      luckPlay.disabled = true;
+
+      luckDownload.onclick = () => downloadCoupon(prize, code, ts);
+
+      // обновим кнопку в хиро
+      syncLuckButton();
+    }
+
+    function downloadCoupon(prize, code, ts){
+      const canvas = document.createElement("canvas");
+      const dpr = Math.max(1, Math.min(2.5, window.devicePixelRatio || 1));
+      const W = 1080, H = 720;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      canvas.style.width = W + "px";
+      canvas.style.height = H + "px";
+      const ctx = canvas.getContext("2d");
+      ctx.scale(dpr, dpr);
+
+      // helpers
+      function rrect(x,y,w,h,r){
+        const rr = Math.min(r, w/2, h/2);
+        ctx.beginPath();
+        ctx.moveTo(x+rr, y);
+        ctx.arcTo(x+w, y, x+w, y+h, rr);
+        ctx.arcTo(x+w, y+h, x, y+h, rr);
+        ctx.arcTo(x, y+h, x, y, rr);
+        ctx.arcTo(x, y, x+w, y, rr);
+        ctx.closePath();
+      }
+
+      // background
+      const bg = ctx.createLinearGradient(0,0,0,H);
+      bg.addColorStop(0, "#ffffff");
+      bg.addColorStop(1, "#f4f7ff");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0,0,W,H);
+
+      // soft blobs
+      function blob(x,y,rx,ry,rgba){
+        const g = ctx.createRadialGradient(x,y,0,x,y,Math.max(rx,ry));
+        g.addColorStop(0, rgba);
+        g.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);
+        ctx.fill();
+      }
+      blob(220, 150, 260, 180, "rgba(37,99,235,.18)");
+      blob(900, 120, 280, 190, "rgba(239,68,68,.16)");
+      blob(620, 660, 320, 210, "rgba(16,185,129,.16)");
+
+      // main card
+      const pad = 64;
+      const x = pad, y = pad;
+      const w = W - pad*2, h = H - pad*2;
+      ctx.save();
+      ctx.shadowColor = "rgba(15,23,42,.18)";
+      ctx.shadowBlur = 28;
+      ctx.shadowOffsetY = 10;
+      ctx.fillStyle = "rgba(255,255,255,.92)";
+      rrect(x,y,w,h,28);
+      ctx.fill();
+      ctx.restore();
+
+      // border
+      ctx.strokeStyle = "rgba(15,23,42,.12)";
+      ctx.lineWidth = 2;
+      rrect(x,y,w,h,28);
+      ctx.stroke();
+
+      // top accent line
+      const grad = ctx.createLinearGradient(x, y, x+w, y);
+      grad.addColorStop(0, "rgba(37,99,235,.9)");
+      grad.addColorStop(.33, "rgba(239,68,68,.85)");
+      grad.addColorStop(.66, "rgba(16,185,129,.85)");
+      grad.addColorStop(1, "rgba(245,158,11,.9)");
+      ctx.fillStyle = grad;
+      rrect(x+18, y+18, w-36, 10, 8);
+      ctx.fill();
+
+      // header
+      ctx.fillStyle = "rgba(15,23,42,.92)";
+      ctx.font = "800 34px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillText("Power English", x+36, y+86);
+
+      ctx.fillStyle = "rgba(37,99,235,.95)";
+      ctx.font = "800 22px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillText("Призовой купон", x+36, y+120);
+
+      // prize
+      ctx.fillStyle = "rgba(15,23,42,.92)";
+      ctx.font = "900 38px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      wrapText(ctx, prize.title, x+36, y+190, w-72, 44);
+
+      // code block
+      const bx = x+36, by = y+360, bw = w-72, bh = 120;
+      ctx.fillStyle = "rgba(37,99,235,.08)";
+      rrect(bx, by, bw, bh, 22);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(37,99,235,.22)";
+      ctx.lineWidth = 2;
+      rrect(bx, by, bw, bh, 22);
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(15,23,42,.75)";
+      ctx.font = "700 16px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillText("Код купона", bx+22, by+34);
+
+      ctx.fillStyle = "rgba(15,23,42,.92)";
+      ctx.font = "900 48px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillText(code, bx+22, by+90);
+
+      // date + hint
+      ctx.fillStyle = "rgba(71,85,105,.95)";
+      ctx.font = "700 16px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillText("Дата выдачи: " + fmtDate(ts), x+36, y+h-78);
+      ctx.fillStyle = "rgba(71,85,105,.9)";
+      ctx.font = "600 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillText("Покажите код при покупке (VK). Купон можно использовать один раз.", x+36, y+h-48);
+
+      // download
+      const a = document.createElement("a");
+      a.download = `coupon-${code}.png`;
+      a.href = canvas.toDataURL("image/png");
+      a.click();
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+      const words = String(text).split(/\s+/);
+      let line = "";
+      let yy = y;
+      for(let n=0; n<words.length; n++){
+        const testLine = line ? (line + " " + words[n]) : words[n];
+        const m = ctx.measureText(testLine);
+        if(m.width > maxWidth && n > 0){
+          ctx.fillText(line, x, yy);
+          line = words[n];
+          yy += lineHeight;
+        }else{
+          line = testLine;
+        }
+      }
+      if(line) ctx.fillText(line, x, yy);
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function syncLuckButton(){
+      const saved = loadLuck();
+      if(!luckBtn) return;
+      if(saved && saved.claimed){
+        luckBtn.innerHTML = `<span class="luck-spark">✅</span> Купон получен`;
+      }else{
+        luckBtn.innerHTML = `<span class="luck-spark">🎲</span> Мне повезёт!`;
+      }
+    }
+
+    // wiring
+    if(luckBtn){
+      luckBtn.addEventListener("click", openLuck);
+      syncLuckButton();
+    }
+
+    luckClose.addEventListener("click", closeLuck);
+    luckOverlay.addEventListener("click", (e) => { if(e.target === luckOverlay) closeLuck(); });
+
+    document.addEventListener("keydown", (e) => {
+      if(luckOverlay.style.display !== "flex") return;
+      if(e.key === "Escape") closeLuck();
+    });
+
+    rulesBtn.addEventListener("click", openRules);
+    rulesClose.addEventListener("click", closeRules);
+    rulesOverlay.addEventListener("click", (e) => { if(e.target === rulesOverlay) closeRules(); });
+
+    luckPlay.addEventListener("click", startGame);
+
+    // click / keyboard pick
+    luckBoard.addEventListener("click", (e) => {
+      const card = e.target.closest(".pcard");
+      if(!card) return;
+      onPick(card);
+    });
+    luckBoard.addEventListener("keydown", (e) => {
+      if(e.key !== "Enter" && e.key !== " ") return;
+      const card = e.target.closest(".pcard");
+      if(!card) return;
+      e.preventDefault();
+      onPick(card);
+    });
   </script>
 </body>
 </html>
